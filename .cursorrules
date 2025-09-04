@@ -1,0 +1,138 @@
+# Cursor AI Rules for Todo App
+
+## 프로젝트 개요
+Next.js 15 + TypeScript + PostgreSQL + DDD 기반 Todo 애플리케이션
+
+## 핵심 원칙
+- **DDD**: 도메인 중심 사고, 비즈니스 로직 우선
+- **Clean Architecture**: 의존성 역전, 레이어 분리
+- **의존성 방향**: Presentation → Application → Domain ← Infrastructure
+
+## 코딩 규칙
+
+### 네이밍 컨벤션
+- **클래스**: PascalCase (User, TodoRepository)
+- **인터페이스**: PascalCase (UserRepository, AuthService)
+- **함수/메서드**: camelCase (createUser, validateEmail)
+- **상수**: UPPER_SNAKE_CASE (MAX_TODO_COUNT)
+- **타입**: PascalCase (UserId, TodoStatus)
+- **폴더**: kebab-case (user-repository, auth-service)
+
+### 파일 구조 규칙
+- **도메인**: `domain/{domain-name}/entities/`, `value-objects/`, `repositories/`
+- **인프라**: `infrastructure/{domain-name}/` (구현체)
+- **애플리케이션**: `application/{domain-name}/use-cases/`
+- **프레젠테이션**: `presentation/components/`, `hooks/`, `providers/`
+
+## 도메인 모델링 규칙
+
+### 엔티티
+- private readonly 필드 사용
+- getter로 외부 접근
+- 비즈니스 메서드만 포함
+
+### 값 객체
+- 불변 객체
+- 생성자에서 검증
+- equals 메서드 구현
+
+## 유스케이스 작성 규칙
+
+### 구조
+- Command/Result 인터페이스 정의
+- execute 메서드로 비즈니스 로직 실행
+- 1.검증 → 2.도메인객체생성 → 3.저장 → 4.부수효과 → 5.이벤트발행
+
+## 서버 액션 작성 규칙
+
+### 위치
+- 라우트별: `app/(auth)/signup/actions.ts`
+- 도메인별: `presentation/actions/auth-actions.ts`
+
+### 구조
+- 'use server' 지시어 필수
+- container에서 UseCase 주입
+- formData에서 데이터 추출
+- 성공시 redirect, 실패시 에러 반환
+
+## 컴포넌트 작성 규칙
+
+### 구조
+- 'use client' 지시어 사용
+- useState로 로딩/에러 상태 관리
+- handleSubmit에서 서버 액션 호출
+- 성공/실패 콜백 처리
+
+## 에러 처리 규칙
+
+### 도메인 예외
+- DomainException을 상속
+- 명확한 에러 메시지
+- name 속성 설정
+
+## 파일 생성 순서
+
+새로운 기능을 개발할 때 다음 순서로 파일을 생성하세요:
+
+1. **도메인 타입 정의** (`domain/{domain}/types.ts`)
+2. **도메인 예외** (`domain/{domain}/exceptions/`)
+3. **값 객체** (`domain/{domain}/value-objects/`)
+4. **엔티티** (`domain/{domain}/entities/`)
+5. **리포지토리 인터페이스** (`domain/{domain}/repositories/`)
+6. **도메인 서비스** (`domain/{domain}/services/`)
+7. **도메인 이벤트** (`domain/{domain}/events/`)
+8. **인프라 구현체** (`infrastructure/{domain}/`)
+9. **유스케이스** (`application/{domain}/use-cases/`)
+10. **서버 액션** (`app/{route}/actions.ts`)
+11. **컴포넌트** (`presentation/components/`)
+
+## 테스트 작성 규칙
+
+### 단위 테스트
+- Given-When-Then 패턴 사용
+- describe로 그룹화
+- 명확한 테스트 이름
+
+## 의존성 주입 규칙
+
+### 컨테이너 설정
+- InversifyJS 사용
+- Repository와 UseCase 바인딩
+- lib/container.ts에서 관리
+
+## 금지사항
+
+### 도메인 레이어에서 금지
+- ❌ 외부 라이브러리 직접 사용
+- ❌ 데이터베이스 연결
+- ❌ HTTP 요청
+- ❌ 파일 시스템 접근
+- ❌ any 타입 사용
+
+### 애플리케이션 레이어에서 금지
+- ❌ UI 컴포넌트 직접 참조
+- ❌ Next.js 특정 API 직접 사용
+- ❌ 비즈니스 로직 구현 (도메인에 위임)
+
+### 인프라스트럭처 레이어에서 금지
+- ❌ 비즈니스 로직 구현
+- ❌ UI 관련 코드
+
+## 코드 생성 시 고려사항
+
+1. **항상 도메인 중심으로 생각**: 비즈니스 로직을 먼저 모델링
+2. **의존성 방향 준수**: 상위 레이어가 하위 레이어에만 의존
+3. **인터페이스 우선**: 구현체보다 인터페이스를 먼저 정의
+4. **에러 처리**: 명확한 예외 계층 구조 사용
+5. **테스트 가능성**: 의존성 주입과 모킹을 고려한 설계
+6. **타입 안전성**: any 타입 사용 금지, 명확한 타입 정의
+7. **불변성**: 도메인 객체는 불변으로 설계
+8. **단일 책임**: 각 클래스와 메서드는 하나의 책임만 가짐
+
+## 기술 스택
+Next.js 15 + TypeScript + PostgreSQL + shadcn/ui + Tailwind CSS
+
+## 참고 문서
+- `CONVENTIONS.md`: 팀 컨벤션
+- `docs/ARCHITECTURE.md`: 아키텍처 가이드
+- `docs/DEVELOPMENT.md`: 개발 가이드
