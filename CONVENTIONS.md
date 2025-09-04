@@ -25,13 +25,82 @@
 ### 전체 프로젝트 구조
 ```
 src/
-├── app/                    # Next.js App Router (라우팅)
-├── domain/                 # 비즈니스 로직 (순수)
-├── infrastructure/         # 기술적 구현
-├── application/            # 유스케이스 조정
-├── presentation/           # UI 컴포넌트
-├── lib/                    # 유틸리티 및 설정
-└── types/                  # 전역 타입 정의
+├── app/                           # Next.js 라우팅
+│   ├── (auth)/                    # 인증 페이지
+│   │   ├── signup/page.tsx + actions.ts
+│   │   └── login/page.tsx + actions.ts
+│   ├── (dashboard)/               # 대시보드 페이지
+│   │   └── todos/page.tsx + actions.ts
+│   └── layout.tsx + page.tsx
+│
+├── domain/                        # 비즈니스 로직 (순수)
+│   ├── auth/                      # 인증 도메인
+│   │   ├── entities/user.ts
+│   │   ├── value-objects/email.ts, password.ts
+│   │   ├── repositories/user-repository.ts
+│   │   └── services/auth-service.ts
+│   └── todo/                      # 할일 도메인
+│       ├── entities/todo.ts
+│       ├── value-objects/todo-title.ts, todo-status.ts
+│       ├── repositories/todo-repository.ts
+│       └── services/todo-service.ts
+│
+├── infrastructure/                # 기술 구현체
+│   ├── auth/
+│   │   ├── postgres-user-repository.ts
+│   │   └── jwt-service.ts
+│   └── todo/
+│       └── postgres-todo-repository.ts
+│
+├── application/                   # 유스케이스
+│   ├── auth/
+│   │   ├── register-user.use-case.ts
+│   │   └── login-user.use-case.ts
+│   └── todo/
+│       ├── create-todo.use-case.ts
+│       └── complete-todo.use-case.ts
+│
+├── presentation/                  # UI 컴포넌트
+│   ├── components/
+│   │   ├── ui/ (shadcn/ui)
+│   │   ├── forms/auth/
+│   │   └── features/todo/
+│   ├── hooks/
+│   └── providers/
+│
+├── lib/                           # 유틸리티
+│   ├── container.ts (DI)
+│   ├── utils.ts
+│   └── validations.ts
+│
+└── types/                         # 전역 타입
+    ├── auth.types.ts
+    └── todo.types.ts
+```
+
+### 핵심 원칙
+
+#### 의존성 방향
+```
+Presentation → Application → Domain ← Infrastructure
+```
+
+#### 레이어별 역할
+- **`app/`**: 페이지 + 서버 액션 (라우팅만)
+- **`domain/`**: 비즈니스 로직 (순수, 의존성 없음)
+- **`infrastructure/`**: DB, 외부 서비스 구현체
+- **`application/`**: 유스케이스 (도메인 조합)
+- **`presentation/`**: UI 컴포넌트 + 훅
+
+#### 도메인 구조 (각 도메인마다)
+```
+domain/{domain}/
+├── entities/          # 엔티티
+├── value-objects/     # 값 객체
+├── repositories/      # 리포지토리 인터페이스
+├── services/          # 도메인 서비스
+├── events/            # 도메인 이벤트
+└── exceptions/        # 도메인 예외
 ```
 
 > **아키텍처 상세 설명은 `docs/ARCHITECTURE.md` 참고**
