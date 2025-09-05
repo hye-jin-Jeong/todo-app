@@ -15,13 +15,15 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  email           String    @unique
+  hashedPassword  String?   @map("hashed_password")
+  emailVerified   DateTime? @map("email_verified")
+  accounts        Account[]
+  sessions        Session[]
+  todos           Todo[]
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -67,4 +69,30 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Todo {
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id")
+  title       String
+  description String?
+  status      TodoStatus  @default(PENDING)
+  priority    TodoPriority @default(MEDIUM)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("todos")
+}
+
+enum TodoStatus {
+  PENDING
+  COMPLETED
+}
+
+enum TodoPriority {
+  LOW
+  MEDIUM
+  HIGH
 }
