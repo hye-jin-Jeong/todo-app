@@ -22,6 +22,12 @@
 - **PascalCase**: 컴포넌트 파일명 (UserForm.tsx, TodoList.tsx)
 - **camelCase**: 일반 파일명 (userService.ts, authActions.ts)
 
+### 파일명 컨벤션 (중요!)
+- **유스케이스**: `{name}.use-case.ts` (예: `register-user.use-case.ts`)
+- **리포지토리**: `{technology}-{domain}.repository.ts` (예: `postgres-user.repository.ts`)
+- **서버 액션**: `actions.ts` (라우트 폴더 내에 위치)
+- **DTO**: 유스케이스 파일 내에 정의 (별도 폴더 사용 금지)
+
 ### 전체 프로젝트 구조
 ```
 src/
@@ -47,18 +53,18 @@ src/
 │
 ├── infrastructure/                # 기술 구현체
 │   ├── auth/
-│   │   ├── postgres-user-repository.ts
+│   │   ├── postgres-user.repository.ts    # ✅ 컨벤션 준수
 │   │   └── jwt-service.ts
 │   └── todo/
-│       └── postgres-todo-repository.ts
+│       └── postgres-todo.repository.ts    # ✅ 컨벤션 준수
 │
 ├── application/                   # 유스케이스
 │   ├── auth/
-│   │   ├── register-user.use-case.ts
-│   │   └── login-user.use-case.ts
+│   │   ├── register-user.use-case.ts      # ✅ 컨벤션 준수
+│   │   └── login-user.use-case.ts         # ✅ 컨벤션 준수
 │   └── todo/
-│       ├── create-todo.use-case.ts
-│       └── complete-todo.use-case.ts
+│       ├── create-todo.use-case.ts        # ✅ 컨벤션 준수
+│       └── complete-todo.use-case.ts      # ✅ 컨벤션 준수
 │
 ├── presentation/                  # UI 컴포넌트
 │   ├── components/

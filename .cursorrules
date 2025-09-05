@@ -47,13 +47,18 @@ Next.js 15 + TypeScript + PostgreSQL + DDD 기반 Todo 애플리케이션
 
 ### 위치
 - 라우트별: `app/(auth)/signup/actions.ts`
-- 도메인별: `presentation/actions/auth-actions.ts`
 
 ### 구조
 - 'use server' 지시어 필수
 - container에서 UseCase 주입
 - formData에서 데이터 추출
-- 성공시 redirect, 실패시 에러 반환
+- 성공시 redirectTo 반환, 실패시 에러 반환
+
+### ⚠️ 중요: redirect 함수 사용 금지
+- **절대 금지**: `'use server'` 액션에서 `redirect()` 함수 직접 사용
+- **올바른 방법**: `{ success: false, error: '메시지', redirectTo: '/path' }` 반환
+- **이유**: Next.js에서 'use server'와 redirect 동시 사용 시 충돌 발생
+- **클라이언트 처리**: 컴포넌트에서 `result.redirectTo`를 받아 `router.push()`로 처리
 
 ## 컴포넌트 작성 규칙
 
@@ -62,6 +67,23 @@ Next.js 15 + TypeScript + PostgreSQL + DDD 기반 Todo 애플리케이션
 - useState로 로딩/에러 상태 관리
 - handleSubmit에서 서버 액션 호출
 - 성공/실패 콜백 처리
+
+### redirectTo 처리 방법
+- `useRouter` 훅 사용: `import { useRouter } from 'next/navigation'`
+- 서버 액션 결과에서 `result.redirectTo` 확인
+- `router.push(result.redirectTo)`로 클라이언트 사이드 리다이렉트 처리
+- 예시:
+```typescript
+if (result.success) {
+  // 성공 처리
+} else {
+  if (result.redirectTo) {
+    router.push(result.redirectTo)
+    return
+  }
+  setError(result.error)
+}
+```
 
 ## 에러 처리 규칙
 
@@ -118,6 +140,11 @@ Next.js 15 + TypeScript + PostgreSQL + DDD 기반 Todo 애플리케이션
 - ❌ 비즈니스 로직 구현
 - ❌ UI 관련 코드
 
+### 서버 액션에서 금지
+- ❌ `'use server'` 액션에서 `redirect()` 함수 직접 사용
+- ❌ Next.js navigation 함수 직접 호출
+- ❌ 클라이언트 사이드 코드와 서버 사이드 코드 혼용
+
 ## 코드 생성 시 고려사항
 
 1. **항상 도메인 중심으로 생각**: 비즈니스 로직을 먼저 모델링
@@ -128,6 +155,7 @@ Next.js 15 + TypeScript + PostgreSQL + DDD 기반 Todo 애플리케이션
 6. **타입 안전성**: any 타입 사용 금지, 명확한 타입 정의
 7. **불변성**: 도메인 객체는 불변으로 설계
 8. **단일 책임**: 각 클래스와 메서드는 하나의 책임만 가짐
+9. **서버 액션 안전성**: 'use server'에서 redirect 직접 사용 금지, redirectTo 패턴 사용
 
 ## 기술 스택
 Next.js 15 + TypeScript + PostgreSQL + shadcn/ui + Tailwind CSS
